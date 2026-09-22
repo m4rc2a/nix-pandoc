@@ -11,7 +11,12 @@
   outputs = { self, nixpkgs, flake-utils }:
     {
 
-      overlay = final: prev: { mkDoc = final.callPackage ./mkDoc.nix { }; };
+      overlay = final: prev: {
+        mkDoc = final.callPackage ./mkDoc.nix { };
+        mkShell = final.callPackage ./mkShell.nix { };
+      };
+
+      lib.pageCheck = import ./pageCheck.nix;
 
       templates.presentation-serokell = {
         description = "A typical Serokell-themed presentation, with minted for code highlighting, Google fonts, Serokell theme, speaker notes and some nice defaults";
@@ -23,6 +28,8 @@
       in {
 
         mkDoc = pkgs.callPackage ./mkDoc.nix { };
+
+        mkShell = pkgs.callPackage ./mkShell.nix { };
 
         checks = {
           reuse =

@@ -61,6 +61,42 @@ it to =mkDoc= as =texlive-combined=.
 You may pass =extraTexInputs=, which should be a list of directories containing
 =sty= files that you may later use in your document.
 
+** Fork extensions
+This fork (maintained by Marc Zander, =m4rc2a/nix-pandoc=) adds two helpers
+that are handy when repeatedly writing papers:
+
+*** =mkShell= – reusable development shell
+Builds a =devShell= with =make=, =pandoc=, =texlive= (xelatex, tikz, ...) and
+=poppler-utils= (=pdfinfo=, =pdftotext=, =pdftoppm=) so you can build and
+inspect PDFs directly. From a project flake:
+
+#+BEGIN_SRC nix
+  devShells = { default = nix-pandoc.mkShell.${system} { }; };
+#+END_SRC
+
+Options: =texlive-combined= (default: =texlive.combined.scheme-medium=),
+=extraPackages=.
+
+*** =lib.pageCheck= – page-count check for =mkDoc=
+Returns a =checkPhase= snippet that fails when the built PDF is outside a page
+range. Combined with =mkDoc= (which forwards arbitrary stdenv attributes):
+
+#+BEGIN_SRC nix
+  defaultPackage = nix-pandoc.mkDoc.${system} {
+    name = "your-document-name";
+    src = ./.;
+    extraBuildInputs = [ pkgs.poppler_utils ];
+    phases = [ "unpackPhase" "buildPhase" "installPhase" "checkPhase" ];
+    checkPhase = nix-pandoc.lib.pageCheck {
+      file = "$out/your-document.pdf";
+      min = 3;
+      max = 5;
+    };
+  };
+#+END_SRC
+
+Then =nix flake check= (with the derivation in =checks=) verifies the page count.
+
 ** License
 This project is licensed under the Mozilla Public License, version 2.0;
 You may read more in [[./LICENSE]].
