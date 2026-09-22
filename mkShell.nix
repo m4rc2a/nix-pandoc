@@ -21,7 +21,7 @@
 }@args:
 pkgs.mkShell ({
   packages = [
-    pkgs.makeUtils
+    pkgs.gnumake
     pkgs.pandoc
     texlive-combined
     pkgs.poppler-utils
