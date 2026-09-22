@@ -24,6 +24,6 @@ pkgs.mkShell ({
     pkgs.makeUtils
     pkgs.pandoc
     texlive-combined
-    pkgs.poppler_utils
+    pkgs.poppler-utils
   ] ++ extraPackages;
 } // args)
