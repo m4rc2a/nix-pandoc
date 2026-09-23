@@ -49,6 +49,30 @@ You can run =nix build= to build your documents, or =nix develop= to get
 into a shell from where you can run =make= to build your documents more
 granularly.
 
+** Caveat: stale build artifacts
+With =src = ./.=, existing build outputs (e.g. a previously built =*.pdf=)
+are copied into the build sandbox together with the sources. Since Nix
+normalises all source file timestamps, Make rules of the form =pdf: md=
+never detect a change — you get =make: Nothing to be done for 'all'= and the
+stale PDF is installed into =$out= instead of being rebuilt.
+
+Prevent this by marking the output targets as phony so that make always
+rebuilds them:
+
+#+BEGIN_SRC makefile
+  .PHONY: $(PDF) all install clean
+#+END_SRC
+
+or by removing stale outputs before the build run, e.g. via =mkDoc='s
+=preBuild= (mkDoc forwards arbitrary =stdenv.mkDerivation= attributes):
+
+#+BEGIN_SRC nix
+  preBuild = "rm -f flexray.pdf";
+#+END_SRC
+
+A =lib.pageCheck= in =checks= (see below) additionally fails the build when
+a stale PDF is outside the expected page range.
+
 ** Fonts
 Pass a =font= argument to =mkDoc= containing the path to your font's package
 (the font(s) must be located under =share/fonts/=).

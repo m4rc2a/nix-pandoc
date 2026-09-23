@@ -41,4 +41,7 @@ install: $(TARGETS)
 	mkdir -p $(out)
 	cp $^ $(out)
 
-.PHONY: all install clean check autoreload
+# Outputs are phony: within a nix sandbox all source files share the same
+# mtime, so make would otherwise skip rebuilding and a stale output
+# (copied in via `src = ./.`) would be installed instead.
+.PHONY: all install clean check autoreload $(TARGETS)
